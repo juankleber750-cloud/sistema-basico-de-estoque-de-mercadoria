@@ -1,10 +1,10 @@
-# Sistema Básico de Estoque de Mercadoria
+Sistema Básico de Estoque de Mercadoria
 
-Sistema simples de controle de estoque em Python, usando **PyMySQL** para conexão direta com um banco de dados **MySQL**.
+Sistema simples de controle de estoque em Python, usando PyMySQL para conexão direta com um banco de dados MySQL.
 
 > Depois de um tempo estudando sobre MySQL, consegui montar esse pequeno sistema de estoque de produtos em Python com PyMySQL.
 
-## 📋 Sobre o projeto
+Sobre o projeto
 
 Este projeto foi criado como estudo de conexão entre Python e MySQL, cobrindo:
 
@@ -14,11 +14,11 @@ Este projeto foi criado como estudo de conexão entre Python e MySQL, cobrindo:
 - Validações de entrada (valores negativos, IDs inexistentes, colunas inválidas)
 - Boas práticas de segurança (queries parametrizadas, credenciais fora do código)
 
-## 🗂️ Estrutura do banco
+Estrutura do banco
 
-**Banco:** `inventario`
+Banco: `inventario`
 
-**Tabela:** `produtos`
+Tabela: `produtos`
 
 | Coluna | Tipo             | Observações                    |
 |--------|------------------|----------------------------------|
@@ -26,7 +26,7 @@ Este projeto foi criado como estudo de conexão entre Python e MySQL, cobrindo:
 | nome   | VARCHAR(40)      | Único (não permite duplicados)   |
 | valor  | DECIMAL(5,2)     | Preço do produto                 |
 
-## ⚙️ Pré-requisitos
+Pré-requisitos
 
 - Python 3.10+
 - MySQL Server instalado e rodando
@@ -38,9 +38,9 @@ Instalação da dependência:
 pip install pymysql
 ```
 
-## 🔐 Configuração das credenciais
+Configuração das credenciais
 
-As credenciais do banco **não ficam no código-fonte** — elas ficam em um arquivo separado (`usuario.py`) que **não é versionado no Git**.
+As credenciais do banco não ficam no código-fonte — elas ficam em um arquivo separado (`usuario.py`) que não é versionado no Git.
 
 1. Crie um arquivo `usuario.py` na raiz do projeto:
 
@@ -50,15 +50,7 @@ senha = "sua_senha_aqui"
 host = "localhost"
 ```
 
-2. Garanta que esse arquivo está no `.gitignore`:
-
-```
-usuario.py
-```
-
-> ⚠️ **Nunca suba esse arquivo pro GitHub.** Ele contém a senha do seu banco de dados.
-
-## 🚀 Como rodar
+Como rodar
 
 1. Clone o repositório:
 
@@ -86,7 +78,7 @@ O script vai:
 - Criar a tabela `produtos` (se ainda não existir)
 - Executar as operações definidas no código (adicionar, listar, etc.)
 
-## 🧱 Estrutura de código (classe `db`)
+Estrutura de código (classe `db`)
 
 O projeto usa uma classe `db` que centraliza a conexão e os métodos de CRUD:
 
@@ -100,7 +92,7 @@ banco1.remover(2)                          # remove um produto
 banco1.desligar()                          # fecha a conexão
 ```
 
-### Métodos disponíveis
+Métodos disponíveis
 
 | Método                                        | Ação                                                                 |
 |------------------------------------------------|-----------------------------------------------------------------------|
@@ -111,7 +103,7 @@ banco1.desligar()                          # fecha a conexão
 | `remover(id)`                                  | Remove um produto pelo `id`, validando se ele existe                 |
 | `desligar()`                                   | Fecha o cursor e a conexão com o banco                                |
 
-### Detalhes do `ver_tabela()`
+Detalhes do `ver_tabela()`
 
 O método aceita parâmetros opcionais para consultas mais flexíveis:
 
@@ -125,27 +117,20 @@ banco1.ver_tabela(ordem='valor')             # todos, ordenados por valor
 - `nome`: qual coluna retornar (`'nome'`, `'id'`, `'valor'` ou `'*'` para todas)
 - `id`: filtra por um produto específico
 - `ordem`: ordena o resultado por uma coluna válida
-- `desc`: ⚠️ **em desenvolvimento** — a ideia é permitir ordenação decrescente (`ORDER BY ... DESC`), mas essa parte ainda não está implementada nas queries
+- `desc`: em desenvolvimento — a ideia é permitir ordenação decrescente (`ORDER BY ... DESC`), mas essa parte ainda não está implementada nas queries
 
 Todos os parâmetros passam por validação antes de montar a consulta, evitando valores inválidos ou nomes de coluna não permitidos.
 
-## ⚠️ Observações
+Observações:
 
 - A coluna `nome` é `UNIQUE` — tentar inserir um produto com nome repetido gera erro tratado (`IntegrityError`).
 - `adicionar()` bloqueia valores negativos antes mesmo de tentar inserir no banco.
 - `atualizar()` e `remover()` verificam se o `id` informado existe antes de executar a operação.
-- Nomes de colunas (`nome`, `ordem`) são inseridos via f-string, mas **sempre validados antes** contra uma lista fixa de valores permitidos — o que evita SQL Injection mesmo sem usar `%s` nesses casos.
+- Nomes de colunas (`nome`, `ordem`) são inseridos via f-string, mas sempre validados antes contra uma lista fixa de valores permitidos — o que evita SQL Injection mesmo sem usar `%s` nesses casos.
 - Valores (dados) sempre usam `%s` como placeholder.
 - É necessário chamar `.commit()` após qualquer operação de escrita (`INSERT`, `UPDATE`, `DELETE`).
 
-## 📌 Próximos passos (ideias)
-
-- [ ] Finalizar a implementação do parâmetro `desc` no `ver_tabela()` (ordenação decrescente)
-- [ ] Criar um menu interativo no terminal
-- [ ] Migrar para variáveis de ambiente (`.env`) em vez de `usuario.py`
-- [ ] Adicionar testes automatizados
-
-## 🛠️ Tecnologias utilizadas
+Tecnologias utilizadas:
 
 - [Python 3](https://www.python.org/)
 - [PyMySQL](https://pymysql.readthedocs.io/)
