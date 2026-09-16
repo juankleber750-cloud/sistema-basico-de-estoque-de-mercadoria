@@ -1,137 +1,137 @@
-Sistema Básico de Estoque de Mercadoria
+# Sistema Básico de Estoque de Mercadoria
 
-Sistema simples de controle de estoque em Python, usando PyMySQL para conexão direta com um banco de dados MySQL.
+Sistema simples de controle de estoque em Python, utilizando a biblioteca PyMySQL para integração e persistência de dados em um banco de dados MySQL.
 
-> Depois de um tempo estudando sobre MySQL, consegui montar esse pequeno sistema de estoque de produtos em Python com PyMySQL.
+> Este projeto foi desenvolvido como objeto de estudo prático sobre modelagem de bancos de dados, conexões relacionais com PyMySQL e arquitetura de operações CRUD no ecossistema Python.
 
-Sobre o projeto
+---
 
-Este projeto foi criado como estudo de conexão entre Python e MySQL, cobrindo:
+## 🚀 Sobre o Projeto
 
-- Conexão com banco de dados via `pymysql`
-- Criação automática de banco e tabela (`CREATE DATABASE IF NOT EXISTS`, `CREATE TABLE IF NOT EXISTS`)
-- Operações CRUD (Create, Read, Update, Delete) usando uma classe organizada
-- Validações de entrada (valores negativos, IDs inexistentes, colunas inválidas)
-- Boas práticas de segurança (queries parametrizadas, credenciais fora do código)
+O sistema centraliza o gerenciamento de produtos através de uma classe encapsulada chamada `db`, garantindo que todas as regras de negócio e validações ocorram antes ou durante a persistência dos dados.
 
-Estrutura do banco
+### Principais aprendizados cobertos:
+- Conexão e manipulação do banco de dados via `pymysql`.
+- Automação de infraestrutura estrutural (`CREATE DATABASE` e `CREATE TABLE` condicionais).
+- Operações CRUD completas (Create, Read, Update, Delete) centralizadas em uma única classe.
+- Validações de consistência lógica (bloqueio de valores negativos, tratamento de IDs inexistentes, restrição de colunas).
+- Segurança de dados contra SQL Injection utilizando queries parametrizadas (`%s`).
 
-Banco: `inventario`
+---
 
-Tabela: `produtos`
+## 📊 Estrutura do Banco de Dados
 
-| Coluna | Tipo             | Observações                    |
+O sistema cria e gerencia de forma autônoma o banco de dados `inventario` contendo a tabela `produtos`:
+
+| Coluna | Tipo             | Propriedades e Regras de Negócio |
 |--------|------------------|----------------------------------|
-| id     | INT              | Chave primária, auto increment   |
-| nome   | VARCHAR(40)      | Único (não permite duplicados)   |
-| valor  | DECIMAL(5,2)     | Preço do produto                 |
+| `id`     | INT              | Chave primária, Auto Incremento. |
+| `nome`   | VARCHAR(40)      | Único (`UNIQUE`). Não aceita duplicidade de produtos. |
+| `valor`  | DECIMAL(5,2)     | Preço do produto. Bloqueia inserção de valores < 0. |
 
-Pré-requisitos
+---
 
-- Python 3.10+
-- MySQL Server instalado e rodando
+## 🛠️ Pré-requisitos e Dependências
+
+- Python 3.10 ou superior
+- MySQL Server (ativo e rodando localmente)
 - Biblioteca `pymysql`
 
-Instalação da dependência:
-
+Instale a dependência obrigatória executando no terminal:
 ```bash
 pip install pymysql
 ```
 
-Configuração das credenciais
+---
 
-As credenciais do banco não ficam no código-fonte — elas ficam em um arquivo separado (`usuario.py`) que não é versionado no Git.
+## 🔐 Configuração das Credenciais (Segurança)
 
-1. Crie um arquivo `usuario.py` na raiz do projeto:
+Como boa prática de segurança, as credenciais de acesso ao seu servidor de banco de dados ficam isoladas em um módulo separado chamado `usuario.py`. **Certifique-se de adicionar este arquivo ao seu `.gitignore`** para não expor suas senhas publicamente.
+
+Crie o arquivo `usuario.py` na raiz do seu projeto com o seguinte conteúdo:
 
 ```python
-user = "root"
-senha = "sua_senha_aqui"
+user = "seu_usuario_do_mysql"
+senha = "sua_senha_do_mysql"
 host = "localhost"
 ```
 
-Como rodar
+---
 
-1. Clone o repositório:
+## ⚡ Como Executar o Projeto
 
-```bash
-git clone https://github.com/juankleber750-cloud/sistema-basico-de-estoque-de-mercadoria
-cd sistema-basico-de-estoque-de-mercadoria
-```
+1. Certifique-se de que o seu servidor MySQL esteja rodando.
+2. Clone o repositório ou navegue até a pasta do projeto:
+   ```bash
+   cd caminho/para/o/projeto_01
+   ```
+3. Garanta que o arquivo `usuario.py` esteja configurado.
+4. Execute o arquivo de ponto de entrada do sistema:
+   ```bash
+   python3 __main__.py
+   ```
 
-2. Instale as dependências:
+---
 
-```bash
-pip install pymysql
-```
+## 🧠 Arquitetura do Código (Classe `db`)
 
-3. Crie o arquivo `usuario.py` com suas credenciais (veja seção acima).
-
-4. Execute o script principal:
-
-```bash
-python3 __main__.py
-```
-
-O script vai:
-- Criar o banco `inventario` (se ainda não existir)
-- Criar a tabela `produtos` (se ainda não existir)
-- Executar as operações definidas no código (adicionar, listar, etc.)
-
-Estrutura de código (classe `db`)
-
-O projeto usa uma classe `db` que centraliza a conexão e os métodos de CRUD:
+A classe `db` abstrai toda a complexidade SQL em métodos Python limpos. Veja como interagir com ela no seu código principal:
 
 ```python
-banco1 = db()                              # conecta ao MySQL
-banco1.criar_inventario()                  # cria banco + tabela
-banco1.adicionar('notebook', 3499.90)      # insere um produto
-banco1.ver_tabela()                        # consulta os produtos
-banco1.atualizar(1, 'notebook gamer', 4599.90)  # atualiza um produto
-banco1.remover(2)                          # remove um produto
-banco1.desligar()                          # fecha a conexão
+from database import db # Supondo que a classe esteja em database.py
+
+# 1. Instancia a classe e abre as conexões com o MySQL
+banco = db()
+
+# 2. Cria a infraestrutura inicial do banco se não existir
+banco.criar_inventario()
+
+# 3. Adiciona produtos validando integridade
+banco.adicionar('Teclado Mecânico', 249.90)
+banco.adicionar('Mouse Gamer', 189.50)
+
+# 4. Consulta a tabela de diferentes maneiras
+produtos = banco.ver_tabela()
+print(produtos)
+
+# 5. Atualiza dados de um produto existente pelo ID
+banco.atualizar(1, 'Teclado RGB', 279.90)
+
+# 6. Remove um item pelo ID
+banco.remover(2)
+
+# 7. Sempre feche os cursores e conexões ao finalizar
+banco.desligar()
 ```
 
-Métodos disponíveis
+---
 
-| Método                                        | Ação                                                                 |
-|------------------------------------------------|-----------------------------------------------------------------------|
-| `criar_inventario()`                           | Cria o banco e a tabela, se não existirem                            |
-| `adicionar(nome, valor)`                       | Insere um novo produto (bloqueia valores negativos e nomes duplicados) |
-| `atualizar(id, nome, valor)`                   | Atualiza um produto existente pelo `id`, validando se o `id` existe   |
-| `ver_tabela(nome='*', id=None, ordem=None, desc=False)` | Consulta produtos, com filtros opcionais por coluna, id e ordenação |
-| `remover(id)`                                  | Remove um produto pelo `id`, validando se ele existe                 |
-| `desligar()`                                   | Fecha o cursor e a conexão com o banco                                |
+## 📖 Documentação dos Métodos
 
-Detalhes do `ver_tabela()`
+| Método | Assinatura | Comportamento e Validações |
+|--------|------------|----------------------------|
+| **`criar_inventario`** | `criar_inventario()` | Cria o schema `inventario` e a tabela `produtos` caso não existam no servidor. |
+| **`adicionar`** | `adicionar(nome, valor)` | Insere um novo registro. Bloqueia valores negativos e trata o erro `IntegrityError` se o nome do produto já existir. |
+| **`atualizar`** | `atualizar(id, nome, valor)` | Modifica o nome e valor de um item existente. Valida se o `id` é positivo e se ele realmente existe na base antes de executar o `UPDATE`. |
+| **`remover`** | `remover(id)` | Deleta de forma permanente um registro pelo `id`. Exibe mensagem de erro caso o ID informado não conste na tabela. |
+| **`ver_tabela`** | `ver_tabela(nome='*', id=None, ordem=None, desc=False)` | Recupera dados customizáveis através de filtros de coluna, ID específico e ordenações avançadas. |
+| **`desligar`** | `desligar()` | Finaliza com segurança os buffers abertos do cursor e a conexão ativa com o banco de dados. |
 
-O método aceita parâmetros opcionais para consultas mais flexíveis:
+### Detalhes Avançados do Método `ver_tabela()`
 
-```python
-banco1.ver_tabela()                          # todas as colunas, todos os produtos
-banco1.ver_tabela(nome='nome')               # só a coluna 'nome'
-banco1.ver_tabela(id=1)                      # só o produto com id=1
-banco1.ver_tabela(ordem='valor')             # todos, ordenados por valor
-```
+O método de leitura foi projetado para aceitar múltiplos filtros opcionais de forma extremamente flexível:
 
-- `nome`: qual coluna retornar (`'nome'`, `'id'`, `'valor'` ou `'*'` para todas)
-- `id`: filtra por um produto específico
-- `ordem`: ordena o resultado por uma coluna válida
-- `desc`: em desenvolvimento — a ideia é permitir ordenação decrescente (`ORDER BY ... DESC`), mas essa parte ainda não está implementada nas queries
+* **Filtrar colunas específicas:** `banco.ver_tabela(nome='nome')` (retorna apenas a lista de nomes).
+* **Filtrar por ID único:** `banco.ver_tabela(id=5)`.
+* **Ordenar resultados:** `banco.ver_tabela(ordem='valor')` (ordena de forma crescente pelo preço).
+* **Ordenação Decrescente:** `banco.ver_tabela(ordem='valor', desc=True)` (ordena do mais caro para o mais barato).
 
-Todos os parâmetros passam por validação antes de montar a consulta, evitando valores inválidos ou nomes de coluna não permitidos.
+*Nota de Segurança:* Para evitar vulnerabilidades de SQL Injection no nome de colunas e cláusulas de ordenação (onde o operador `%s` não pode ser usado nativamente), o método valida os argumentos contra uma lista estrita de strings permitidas antes de renderizar a query.
 
-Observações:
+---
 
-- A coluna `nome` é `UNIQUE` — tentar inserir um produto com nome repetido gera erro tratado (`IntegrityError`).
-- `adicionar()` bloqueia valores negativos antes mesmo de tentar inserir no banco.
-- `atualizar()` e `remover()` verificam se o `id` informado existe antes de executar a operação.
-- Nomes de colunas (`nome`, `ordem`) são inseridos via f-string, mas sempre validados antes contra uma lista fixa de valores permitidos — o que evita SQL Injection mesmo sem usar `%s` nesses casos.
-- Valores (dados) sempre usam `%s` como placeholder.
-- É necessário chamar `.commit()` após qualquer operação de escrita (`INSERT`, `UPDATE`, `DELETE`).
+## 🛠️ Tecnologias Utilizadas
 
-Tecnologias utilizadas:
-
-- [Python 3](https://www.python.org/)
-- [PyMySQL](https://pymysql.readthedocs.io/)
-- [MySQL](https://www.mysql.com/)
+- **Python 3**
+- **PyMySQL** (Driver de conexão nativo)
+- **MySQL Server** (Banco de dados relacional)
