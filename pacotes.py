@@ -26,39 +26,48 @@ class db():
             print('valor invalido')
         
     def atualizar(self, id, nome, valor):
-        self.cursor.execute('select count(*) from produtos')
-        resultado = (self.cursor.fetchone())[0]
-        if int(id) > resultado or int(id) < 0 or resultado == 0:
+        self.cursor.execute('select id from produtos')
+        r = self.cursor.fetchall()
+        resultado = []
+        for linha in r:
+            resultado.append(linha[0])
+        if int(id) not in resultado or int(id) < 0 or resultado == []:
             print('valor invalido')
         else:
             self.cursor.execute('update produtos set nome = %s, valor = %s where id = %s', (nome, valor, id))
             self.conexao.commit()
 
     def ver_tabela(self, nome='*', id=None, ordem=None, desc=False):
-        self.cursor.execute('select count(*) from produtos')
-        resultado = (self.cursor.fetchone())[0]
-        if ordem not in ['nome','id','valor', None] or nome not in ['nome','id','valor','*'] or desc != True and desc != False:
+        self.cursor.execute('select id from produtos')
+        r = self.cursor.fetchall()
+        resultado = []
+        for linha in r:
+            resultado.append(linha[0])
+        if ordem not in ['nome','id','valor', None] or nome not in ['nome','id','valor','*'] or desc != True and desc != False or id is not None and int(id) not in resultado or id is not None and int(id) < 0 or resultado == []:
             print('valor invalido')
         else:
-            if id is not None and (int(id) > resultado or int(id) < 0 or resultado == 0):
-                print('valor invalido')
-            else:
-                if id == None and ordem == None:
-                    self.cursor.execute(f'select {nome} from produtos')
-                elif id == None and ordem != None and desc == False:
-                    self.cursor.execute(f'select {nome} from produtos order by {ordem}')
-                elif id != None and ordem != None and desc == False:
-                    self.cursor.execute(f'select {nome} from produtos where id = %s order by {ordem}', (id,))
-                elif id != None and ordem == None:
-                    self.cursor.execute(f'select {nome} from produtos where id = %s', (id,))
-                return self.cursor.fetchall()
+            if id == None and ordem == None:
+                self.cursor.execute(f'select {nome} from produtos')
+            elif id == None and ordem != None and desc == False:
+                self.cursor.execute(f'select {nome} from produtos order by {ordem}')
+            elif id == None and ordem != None and desc == True:
+                self.cursor.execute(f'select {nome} from produtos order by {ordem} desc')
+            elif id != None and ordem != None and desc == False:
+                self.cursor.execute(f'select {nome} from produtos where id = %s order by {ordem}', (id,))
+            elif id != None and ordem != None and desc == True:
+                self.cursor.execute(f'select {nome} from produtos where id = %s order by {ordem} desc', (id,))
+            elif id != None and ordem == None:
+                self.cursor.execute(f'select {nome} from produtos where id = %s', (id,))
+            return self.cursor.fetchall()
 
     def remover(self, id):
-        self.cursor.execute('select count(*) from produtos')
-        resultado = (self.cursor.fetchone())[0]
-        if id is not None and (int(id) > resultado or int(id) < 0 or resultado == 0):
+        self.cursor.execute('select id from produtos')
+        r = self.cursor.fetchall()
+        resultado = []
+        for linha in r:
+            resultado.append(linha[0])
+        if id is not None and (int(id) not in resultado or int(id) < 0 or resultado == []):
             print('valor invalido')
         else:
             self.cursor.execute('delete from produtos where id = %s', (id,))
             self.conexao.commit()
-        
