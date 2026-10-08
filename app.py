@@ -14,7 +14,7 @@ def tabela(id):
     if resultado:
         produto = resultado[0]
 
-    if resultado:
+    if not resultado:
         jsonify({'erro': 'produto não encontrado'}), 404
 
     return jsonify({"id": produto[0],"nome": produto[1],"valor": float(produto[2])})
