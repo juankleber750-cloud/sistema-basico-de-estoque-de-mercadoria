@@ -32,7 +32,8 @@ def adicionar_produto():
     banco = db()
     banco.criar_inventario()
     status = banco.adicionar(nome=produto_nome, valor=produto_valor)
-
+    banco.desligar()
+    
     if status.get('status') == 'valor invalido':
         return jsonify({'erro': 'valor fornecido invalido'}), 400
     elif status.get('status') == 'produto ja existente no inventario':
@@ -49,7 +50,7 @@ def alterar_produto():
     banco = db()
     banco.criar_inventario()
     status = banco.atualizar(id=produto_id, nome=produto_nome, valor=produto_valor)
-
+    banco.desligar()
     
     if status.get('status') == 'produto não encontrado':
         return jsonify({'erro': 'produto não encontrado'}), 404
@@ -61,7 +62,8 @@ def remover_produto(id):
     banco = db()
     banco.criar_inventario()
     status = banco.remover(id=id)
-
+    banco.desligar()
+    
     if status.get('status') == 'produto removido com sucesso':
         return jsonify(status)
 

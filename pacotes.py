@@ -30,6 +30,9 @@ class db():
         valor = '999.90' (o valor atribuido ao produto pode ser inteiro ou decimal)
         id = o id é altomaticamente incrementado na tabela
         '''
+        if ',' in valor:
+            valor = valor.replace(',', '.')
+
         if float(valor) >= 0:
             try:
                 self.cursor.execute('insert into produtos (nome, valor) values (%s, %s)', (nome, valor))
@@ -59,8 +62,9 @@ class db():
             return {
             'status':'produto não encontrado'
             }
-
-        
+        if ',' in valor:
+            valor = valor.replace(',', '.')
+            
         self.cursor.execute('update produtos set nome = %s, valor = %s where id = %s', (nome, valor, id))
         self.conexao.commit()
 
