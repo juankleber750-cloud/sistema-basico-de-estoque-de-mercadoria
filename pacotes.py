@@ -1,16 +1,29 @@
-from usuario import user, senha, host
 import pymysql
+from os import getenv
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class db():
+    cont = 0
     def __init__(self):
-        self.conexao = pymysql.connect(user=user, password=senha, host=host, port=3306)
+        self.conexao = pymysql.connect(
+            user=getenv('DB_USER'),
+            password=getenv('DB_PASSWORD'),
+            host=getenv('DB_HOST', 'localhost'),
+            port=int(getenv('DB_PORT', 3306))
+        )
         self.cursor = self.conexao.cursor(pymysql.cursors.DictCursor)
         
     def __enter__(self):
-        self.cursor.execute('create database if not exists inventario')
-        self.cursor.execute('use inventario')
-        self.cursor.execute('create table if not exists produtos (id int auto_increment primary key, nome varchar(40) unique, valor decimal(5, 2), constraint valor_positivo check (valor >= 0))')
+        if db.cont == 0:
+            self.cursor.execute('create database if not exists inventario')
+            self.cursor.execute('use inventario')
+            self.cursor.execute('create table if not exists produtos (id int auto_increment primary key, nome varchar(40) unique, valor decimal(5, 2), constraint valor_positivo check (valor >= 0))')
+            db.cont = 1
+        else:
+            self.cursor.execute('use inventario')
+
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

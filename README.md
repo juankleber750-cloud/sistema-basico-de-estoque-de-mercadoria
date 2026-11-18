@@ -8,7 +8,7 @@ O projeto foi construído separando rigidamente a camada de persistência de dad
 
 ## 🚀 Funcionalidades
 
-- **Criação Autônoma**: O próprio sistema se encarrega de criar o banco de dados (`inventario`) e a tabela (`produtos`) se eles não existirem no servidor.
+- **Criação Autônoma**: Na primeira execução, o sistema cria automaticamente o banco de dados (`inventario`) e a tabela (`produtos`) caso ainda não existam no servidor.
 - **Segurança contra SQL Injection**: Uso estrito de queries parametrizadas (`%s`) e validação de strings (*whitelist*) para o nome de colunas e parâmetros dinâmicos.
 - **Camada de Validação**: Bloqueio de valores negativos para preços, prevenção de duplicações usando restrição `UNIQUE` e tratamento amigável de erros.
 - **API REST Completa (CRUD)**: Endpoints HTTP configurados para criar, ler, atualizar e excluir produtos.
@@ -20,6 +20,7 @@ O projeto foi construído separando rigidamente a camada de persistência de dad
 - **Python 3.12.3**
 - **Flask** (Framework Web / API)
 - **PyMySQL** (Driver de conexão com o banco de dados)
+- **Python-Dotenv** (Gerenciamento de variáveis de ambiente)
 - **MySQL Server** (Banco de dados relacional)
 
 ---
@@ -39,37 +40,48 @@ O banco de dados gerado se chama `inventario` e possui a tabela `produtos` estru
 ## 🔧 Pré-requisitos e Instalação
 
 1. Certifique-se de ter o **Python 3** e o **MySQL Server** instalados e ativos em sua máquina local.
-2. Clone este repositório no seu ambiente de desenvolvimento.
-3. Instale as dependências necessárias executando o comando abaixo no terminal:
-
-```bash
-pip install flask pymysql
-```
+2. Clone este repositório no seu ambiente de desenvolvimento:
+   ```bash
+   git clone https://github.com
+   cd sistema-basico-de-estoque-de-mercadoria
+   ```
+3. Crie e ative um ambiente virtual (`venv`):
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+4. Instale as dependências necessárias:
+   ```bash
+   pip install flask pymysql python-dotenv
+   ```
 
 ---
 
 ## 🔐 Configuração das Credenciais
 
-As credenciais do banco de dados ficam isoladas em um arquivo separado por motivos de segurança. 
+As credenciais do banco de dados ficam isoladas em um arquivo de variáveis de ambiente por motivos de segurança.
 
-Crie um arquivo chamado **`usuario.py`** na raiz do projeto e configure os dados de acesso do seu MySQL local:
-
-```python
-user = "seu_usuario_do_mysql"
-senha = "sua_senha_do_mysql"
-host = "localhost"
-```
+1. Copie o arquivo de exemplo **`.env.example`** e renomeie a cópia para **`.env`** na raiz do projeto:
+   ```bash
+   cp .env.example .env
+   ```
+2. Abra o arquivo **`.env`** e preencha os dados de acesso do seu MySQL local:
+   ```env
+   DB_USER=seu_usuario_do_mysql
+   DB_PASSWORD=sua_senha_do_mysql
+   DB_HOST=localhost
+   DB_PORT=3306
+   ```
 
 ---
 
 ## ⚡ Como Executar
 
-Com o servidor MySQL rodando e o arquivo `usuario.py` devidamente configurado, execute o arquivo principal para iniciar o servidor web do Flask:
+Com o servidor MySQL rodando, o ambiente virtual ativo e o arquivo `.env` configurado, inicie a aplicação:
 
 ```bash
-python app.py
+python3 __main__.py
 ```
-*(Substitua `app.py` pelo nome correto do arquivo que contém a inicialização do Flask caso use outro nome).*
 
 A API estará rodando por padrão em: `http://127.0.0.1:5000`
 
@@ -92,14 +104,16 @@ A API aceita os seguintes parâmetros via Query String (`?parâmetro=valor`) nas
 * **Rota:** `/tabela`
 * **Método:** `POST`
 * **Parâmetros Obrigatórios:** `nome` e `valor`
+* **Exemplo:** `POST /tabela?nome=Teclado&valor=150.00`
 
 ### 3. Atualizar Produto
 * **Rota:** `/tabela`
 * **Método:** `PUT`
 * **Parâmetros Obrigatórios:** `id`, `nome` e `valor`
+* **Exemplo:** `PUT /tabela?id=1&nome=Teclado%20Mecanico&valor=250.00`
 
 ### 4. Remover Produto
 * **Rota:** `/tabela/<id>`
 * **Método:** `DELETE`
-* **Exemplo de uso:** `/tabela/5` (remove o produto com ID 5).
+* **Exemplo:** `DELETE /tabela/5` (remove o produto com ID 5).
 
