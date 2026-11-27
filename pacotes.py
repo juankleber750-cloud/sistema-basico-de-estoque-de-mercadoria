@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-class db():
+class DB():
     cont = 0
     def __init__(self):
         self.conexao = pymysql.connect(
@@ -16,11 +16,11 @@ class db():
         self.cursor = self.conexao.cursor(pymysql.cursors.DictCursor)
         
     def __enter__(self):
-        if db.cont == 0:
+        if DB.cont == 0:
             self.cursor.execute('create database if not exists inventario')
             self.cursor.execute('use inventario')
             self.cursor.execute('create table if not exists produtos (id int auto_increment primary key, nome varchar(40) unique, valor decimal(5, 2), constraint valor_positivo check (valor >= 0))')
-            db.cont = 1
+            DB.cont = 1
         else:
             self.cursor.execute('use inventario')
 
