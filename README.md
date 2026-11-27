@@ -2,13 +2,13 @@
 
 Este projeto é um sistema simples e robusto de controle de estoque desenvolvido em **Python**. Ele expõe uma **API REST utilizando Flask** e gerencia a persistência de dados em um banco de dados relacional **MySQL** por meio da biblioteca **PyMySQL**.
 
-O projeto foi construído separando rigidamente a camada de persistência de dados (módulo do banco) da camada de transporte e rotas (API HTTP).
+O projeto foi construído separando a camada de persistência de dados (`DB` em `pacotes.py`) da camada de transporte e rotas (API HTTP).
 
 ---
 
 ## 🚀 Funcionalidades
 
-- **Criação Autônoma**: Na primeira execução, o sistema cria automaticamente o banco de dados (`inventario`) e a tabela (`produtos`) caso ainda não existam no servidor.
+- **Criação Autônoma**: No primeiro acesso ao banco, o sistema cria automaticamente o banco de dados (`inventario`) e a tabela (`produtos`) caso ainda não existam no servidor.
 - **Segurança contra SQL Injection**: Uso estrito de queries parametrizadas (`%s`) e validação de strings (*whitelist*) para o nome de colunas e parâmetros dinâmicos.
 - **Camada de Validação**: Bloqueio de valores negativos para preços, prevenção de duplicações usando restrição `UNIQUE` e tratamento amigável de erros.
 - **API REST Completa (CRUD)**: Endpoints HTTP configurados para criar, ler, atualizar e excluir produtos.
@@ -42,7 +42,7 @@ O banco de dados gerado se chama `inventario` e possui a tabela `produtos` estru
 1. Certifique-se de ter o **Python 3** e o **MySQL Server** instalados e ativos em sua máquina local.
 2. Clone este repositório no seu ambiente de desenvolvimento:
    ```bash
-   git clone https://github.com
+   git clone https://github.com/juankleber750-cloud/sistema-basico-de-estoque-de-mercadoria
    cd sistema-basico-de-estoque-de-mercadoria
    ```
 3. Crie e ative um ambiente virtual (`venv`):
@@ -67,11 +67,12 @@ As credenciais do banco de dados ficam isoladas em um arquivo de variáveis de a
    ```
 2. Abra o arquivo **`.env`** e preencha os dados de acesso do seu MySQL local:
    ```env
-   DB_USER=seu_usuario_do_mysql
-   DB_PASSWORD=sua_senha_do_mysql
+   DB_USER=Usuario
+   DB_PASSWORD=Senha_do_usuario
    DB_HOST=localhost
    DB_PORT=3306
    ```
+   Substitua `Usuario` e `Senha_do_usuario` pelas credenciais do MySQL.
 
 ---
 
@@ -89,31 +90,41 @@ A API estará rodando por padrão em: `http://127.0.0.1:5000`
 
 ## 🗺️ Documentação da API (Endpoints)
 
-A API aceita os seguintes parâmetros via Query String (`?parâmetro=valor`) nas requisições:
+| Operação | Método e rota | Dados da requisição |
+| :--- | :--- | :--- |
+| Listar produtos | `GET /tabela/` | Query string opcional |
+| Buscar um produto | `GET /tabela/<id>` | ID na URL e query string opcional |
+| Adicionar um produto | `POST /tabela` | Corpo JSON com `nome` e `valor` |
+| Atualizar um produto | `PUT /tabela/<id>` | ID na URL e corpo JSON com `nome` e `valor` |
+| Remover um produto | `DELETE /tabela/<id>` | ID na URL |
 
-### 1. Listar / Buscar Produtos
-* **Rota:** `/tabela`
-* **Método:** `GET`
-* **Parâmetros Opcionais:**
-  * `nome`: Especifica colunas que deseja retornar (`nome`, `id`, `valor` ou `*`).
-  * `id`: Filtra as informações de um ID único de produto.
-  * `ordem`: Ordena por uma coluna específica (`id`, `nome` ou `valor`).
-  * `desc`: Caso queira a ordenação decrescente, defina como `true`.
+### Listar ou buscar produtos
 
-### 2. Adicionar Produto
-* **Rota:** `/tabela`
-* **Método:** `POST`
-* **Parâmetros Obrigatórios:** `nome` e `valor`
-* **Exemplo:** `POST /tabela?nome=Teclado&valor=150.00`
+- `nome` escolhe a coluna retornada (`id`, `nome` ou `valor`). O padrão `*` retorna todas as colunas.
+- `ordem` escolhe a coluna usada para ordenar (`id`, `nome` ou `valor`).
+- `desc=true` ordena de forma decrescente quando `ordem` é informada.
 
-### 3. Atualizar Produto
-* **Rota:** `/tabela`
-* **Método:** `PUT`
-* **Parâmetros Obrigatórios:** `id`, `nome` e `valor`
-* **Exemplo:** `PUT /tabela?id=1&nome=Teclado%20Mecanico&valor=250.00`
+```bash
+curl 'http://127.0.0.1:5000/tabela/?ordem=valor&desc=true'
+curl 'http://127.0.0.1:5000/tabela/1'
+```
 
-### 4. Remover Produto
-* **Rota:** `/tabela/<id>`
-* **Método:** `DELETE`
-* **Exemplo:** `DELETE /tabela/5` (remove o produto com ID 5).
+### Adicionar ou atualizar um produto
 
+Envie um objeto JSON com o cabeçalho `Content-Type: application/json`. Envie `valor` como texto, por exemplo `"150.00"`, porque a validação do preço espera uma string.
+
+```bash
+curl -X POST http://127.0.0.1:5000/tabela \
+  -H 'Content-Type: application/json' \
+  -d '{"nome": "Teclado", "valor": "150.00"}'
+
+curl -X PUT http://127.0.0.1:5000/tabela/1 \
+  -H 'Content-Type: application/json' \
+  -d '{"nome": "Teclado mecânico", "valor": "250.00"}'
+```
+
+### Remover um produto
+
+```bash
+curl -X DELETE http://127.0.0.1:5000/tabela/1
+```
