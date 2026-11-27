@@ -1,33 +1,35 @@
 from flask import Flask, jsonify, request
-from pacotes import db
+from pacotes import DB
 
 app = Flask(__name__)
 
-@app.route('/tabela', methods=['GET'])
-def ver_tabela():
+@app.route('/tabela/', methods=['GET'])
+@app.route('/tabela/<id>', methods=['GET'])
+def ver_tabela(id=None):
     coluna_nome = request.args.get('nome', '*')
-    produto_id = request.args.get('id', None)
     ordenar_por = request.args.get('ordem', None)
     valores_desc = request.args.get('desc', 'false').lower()
     valores_desc = True if valores_desc == 'true' else False
 
-    with db() as banco:
-        status = banco.ver_tabela(nome=coluna_nome, id=produto_id, ordem=ordenar_por, desc=valores_desc)
+    with DB() as banco:
+        status = banco.ver_tabela(nome=coluna_nome, id=id, ordem=ordenar_por, desc=valores_desc)
 
     if type(status) == dict:
         if status.get('status') != 'id inexistente' and status.get('status') != 'valor invalido':
             return jsonify(status)
-
+        elif status.get('status') == 'valor invalido':
+            return jsonify({'erro': 'valor fornecido invalido'}), 400
         return jsonify({'erro': 'produto não encontrado'}), 404
 
     return jsonify(status)
 
 @app.route('/tabela', methods=['POST'])
 def adicionar_produto():
-    produto_nome = request.args.get('nome')
-    produto_valor = request.args.get('valor')
+    dados = request.get_json()
+    produto_nome = dados.get('nome')
+    produto_valor = dados.get('valor')
 
-    with db() as banco:
+    with DB() as banco:
         status = banco.adicionar(nome=produto_nome, valor=produto_valor)
     
     if status.get('status') == 'valor invalido':
@@ -37,14 +39,14 @@ def adicionar_produto():
 
     return jsonify(status)
 
-@app.route('/tabela', methods=['PUT'])
-def alterar_produto():
-    produto_id = request.args.get('id')
-    produto_nome = request.args.get('nome')
-    produto_valor = request.args.get('valor')
+@app.route('/tabela/<id>', methods=['PUT'])
+def alterar_produto(id):
+    dados = request.get_json()
+    produto_nome = dados.get('nome')
+    produto_valor = dados.get('valor')
 
-    with db() as banco:
-        status = banco.atualizar(id=produto_id, nome=produto_nome, valor=produto_valor)
+    with DB() as banco:
+        status = banco.atualizar(id=id, nome=produto_nome, valor=produto_valor)
 
     if status.get('status') == 'produto não encontrado':
         return jsonify({'erro': 'produto não encontrado'}), 404
@@ -56,7 +58,7 @@ def alterar_produto():
 
 @app.route('/tabela/<id>', methods=['DELETE'])
 def remover_produto(id):
-    with db() as banco:
+    with DB() as banco:
         status = banco.remover(id=id)
     
     if status.get('status') == 'produto removido com sucesso':
