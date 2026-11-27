@@ -3,8 +3,8 @@ from pacotes import DB
 
 app = Flask(__name__)
 
-@app.route('/tabela/', methods=['GET'])
-@app.route('/tabela/<id>', methods=['GET'])
+@app.route('/produto/', methods=['GET'])
+@app.route('/produto/<id>', methods=['GET'])
 def ver_tabela(id=None):
     coluna_nome = request.args.get('nome', '*')
     ordenar_por = request.args.get('ordem', None)
@@ -23,7 +23,7 @@ def ver_tabela(id=None):
 
     return jsonify(status)
 
-@app.route('/tabela', methods=['POST'])
+@app.route('/produto', methods=['POST'])
 def adicionar_produto():
     dados = request.get_json()
     produto_nome = dados.get('nome')
@@ -39,7 +39,7 @@ def adicionar_produto():
 
     return jsonify(status)
 
-@app.route('/tabela/<id>', methods=['PUT'])
+@app.route('/produto/<id>', methods=['PUT'])
 def alterar_produto(id):
     dados = request.get_json()
     produto_nome = dados.get('nome')
@@ -56,7 +56,7 @@ def alterar_produto(id):
         
     return jsonify(status)
 
-@app.route('/tabela/<id>', methods=['DELETE'])
+@app.route('/produto/<id>', methods=['DELETE'])
 def remover_produto(id):
     with DB() as banco:
         status = banco.remover(id=id)
